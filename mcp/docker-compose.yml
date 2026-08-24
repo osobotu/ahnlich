@@ -1,3 +1,10 @@
+x-mcp: &mcp
+  image: "${AHNLICH_MCP_IMAGE:-ghcr.io/deven96/ahnlich-mcp}:${AHNLICH_MCP_VERSION:-latest}"
+  stdin_open: true
+  tty: false
+  init: true
+  restart: "no"
+
 services:
   ahnlich_db:
     image: ghcr.io/deven96/ahnlich-db:latest
@@ -47,3 +54,43 @@ services:
       timeout: 5s
       retries: 30
       start_period: 30s
+
+  mcp-db:
+    <<: *mcp
+    profiles: ["db"]
+    command: ["--profile", "db"]
+    environment:
+      AHNLICH_DB_HOST: ahnlich_db
+      AHNLICH_DB_PORT: "1369"
+      AHNLICH_MCP_READ_ONLY: "${AHNLICH_MCP_READ_ONLY:-0}"
+    depends_on:
+      ahnlich_db:
+        condition: service_healthy
+
+  mcp-ai:
+    <<: *mcp
+    profiles: ["ai"]
+    command: ["--profile", "ai"]
+    environment:
+      AHNLICH_AI_HOST: ahnlich_ai
+      AHNLICH_AI_PORT: "1370"
+      AHNLICH_AI_MODEL: "${AHNLICH_AI_MODEL:-all-minilm-l6-v2}"
+      AHNLICH_MCP_READ_ONLY: "${AHNLICH_MCP_READ_ONLY:-0}"
+    depends_on:
+      ahnlich_ai:
+        condition: service_healthy
+
+  mcp-external:
+    <<: *mcp
+    profiles: ["external"]
+    command: ["--profile", "${AHNLICH_PROFILE:-ai}"]
+    environment:
+      AHNLICH_PROFILE: "${AHNLICH_PROFILE:-ai}"
+      AHNLICH_DB_HOST: "${AHNLICH_DB_HOST:-host.docker.internal}"
+      AHNLICH_DB_PORT: "${AHNLICH_DB_PORT:-1369}"
+      AHNLICH_AI_HOST: "${AHNLICH_AI_HOST:-host.docker.internal}"
+      AHNLICH_AI_PORT: "${AHNLICH_AI_PORT:-1370}"
+      AHNLICH_AI_MODEL: "${AHNLICH_AI_MODEL:-all-minilm-l6-v2}"
+      AHNLICH_MCP_READ_ONLY: "${AHNLICH_MCP_READ_ONLY:-0}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

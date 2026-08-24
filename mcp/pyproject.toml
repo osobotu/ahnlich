@@ -7,7 +7,8 @@ license = { text = "MIT" }
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "mcp>=1.27,<2",
-    "ahnlich-client-py>=0.2.1,<0.3",
+    "ahnlich-client-py>=0.4,<0.5",
+    "betterproto>=2.0.0b7,<3",
 ]
 
 [project.scripts]
@@ -36,9 +37,3 @@ testpaths = ["tests"]
 markers = [
     "integration: requires running Ahnlich services",
 ]
-
-[tool.uv]
-prerelease = "allow"
-
-[tool.uv.sources]
-ahnlich-client-py = { path = "../sdk/ahnlich-client-py", editable = true }

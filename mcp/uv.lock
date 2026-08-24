@@ -2,13 +2,10 @@ version = 1
 revision = 3
 requires-python = ">=3.11, <3.14"
 
-[options]
-prerelease-mode = "allow"
-
 [[package]]
 name = "ahnlich-client-py"
-version = "0.2.1"
-source = { editable = "../sdk/ahnlich-client-py" }
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "betterproto", extra = ["compiler"] },
     { name = "bump2version" },
@@ -16,14 +13,9 @@ dependencies = [
     { name = "pytest-asyncio" },
     { name = "toml" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "betterproto", extras = ["compiler"], specifier = ">=2.0.0b7,<3.0.0" },
-    { name = "bump2version", specifier = ">=1.0.1,<2.0.0" },
-    { name = "grpclib", specifier = ">=0.4.1,<0.5.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24.0,<0.25.0" },
-    { name = "toml", specifier = ">=0.10.2,<0.11.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/96/6f/284ece3bafe663b556eb14c4cb4e2409b060c01409b7e448609049d1a426/ahnlich_client_py-0.4.0.tar.gz", hash = "sha256:87b617d9d92845d72a7547062d415d4a87687efbb9464bfa9a9e62de0eda690d", size = 22875, upload-time = "2026-07-03T23:39:57.766Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0f/9d/46f5523b4eb97d8d9e43e58b2996097dfaaf90304fa20f4b2434adaffaa0/ahnlich_client_py-0.4.0-py3-none-any.whl", hash = "sha256:d7b486fd1a5dd5039f855a29a43f0cedf78bdd5f042fc95fd1ad475b1b047e80", size = 29585, upload-time = "2026-07-03T23:39:56.713Z" },
 ]
 
 [[package]]
@@ -32,6 +24,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "ahnlich-client-py" },
+    { name = "betterproto" },
     { name = "mcp" },
 ]
 
@@ -46,7 +39,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ahnlich-client-py", editable = "../sdk/ahnlich-client-py" },
+    { name = "ahnlich-client-py", specifier = ">=0.4,<0.5" },
+    { name = "betterproto", specifier = ">=2.0.0b7,<3" },
     { name = "mcp", specifier = ">=1.27,<2" },
 ]
 
