@@ -22,79 +22,152 @@ flowchart LR
 
 The `db` profile connects directly to `ahnlich-db` and accepts user-provided embeddings. The `ai` profile sends raw text through `ahnlich-ai`, which generates embeddings and stores them in `ahnlich-db`.
 
-## Requirements
+## Before you start
 
-- [uv](https://docs.astral.sh/uv/)
-- Docker with Docker Compose
-- Python 3.11
+Ahnlich MCP connects to running Ahnlich services.
 
-## Installation
+| Profile | Required services |
+|---|---|
+| `ai` | Ahnlich DB on port `1369` and Ahnlich AI on port `1370` |
+| `db` | Ahnlich DB on port `1369` |
 
-From the Ahnlich repository:
+Follow the [Ahnlich installation guide](https://ahnlich.dev/docs/getting-started/installation/) to start the required services.
 
-```bash
-cd mcp
-uv sync --locked --dev
-```
+The examples below use the `ai` profile. To supply your own embeddings, replace `--profile ai` with `--profile db`.
 
-## Profiles
+## Install from PyPI
 
-| Profile | Input | Required services |
-|---|---|---|
-| `db` | Precomputed embeddings | `ahnlich-db` |
-| `ai` | Raw text | `ahnlich-ai` and `ahnlich-db` |
+This is the recommended installation method. Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then use `uvx` to run Ahnlich MCP directly from PyPI.
 
-The default profile is `ai`.
-
-### DB profile
-
-Start the database:
+Verify that the required Ahnlich services are available:
 
 ```bash
-docker compose up -d --wait ahnlich_db
+uvx ahnlich-mcp doctor --profile ai
 ```
 
-Check the connection:
+### Claude Desktop
 
-```bash
-uv run ahnlich-mcp doctor --profile db
-```
-
-Start the MCP server:
-
-```bash
-uv run ahnlich-mcp --profile db
-```
-
-### AI profile
-
-Start the AI proxy and database:
-
-```bash
-docker compose up -d --wait
-```
-
-Check the connection:
-
-```bash
-uv run ahnlich-mcp doctor --profile ai
-```
-
-Start the MCP server:
-
-```bash
-uv run ahnlich-mcp --profile ai
-```
-
-The server uses stdio transport and waits silently for MCP messages. If Ahnlich is unavailable, the server remains running and tool calls return actionable errors.
-
-## MCP client configuration
+Open **Settings → Developer → Edit Config** and add:
 
 ```json
 {
   "mcpServers": {
     "ahnlich": {
-      "command": "/absolute/path/to/uv",
+      "command": "uvx",
+      "args": [
+        "ahnlich-mcp",
+        "--profile",
+        "ai"
+      ]
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving the configuration.
+
+If Claude Desktop cannot find `uvx`, run `command -v uvx` and use the returned absolute path as `command`.
+
+### Codex
+
+Add the server from your terminal:
+
+```bash
+codex mcp add ahnlich -- uvx ahnlich-mcp --profile ai
+```
+
+Confirm that it was added:
+
+```bash
+codex mcp list
+```
+
+You can also use `/mcp` inside Codex to inspect the connection.
+
+## Run with Docker
+
+Use Docker when you want the MCP server and its Python dependencies isolated in a container.
+
+The Ahnlich services must already be running and accessible through their default host ports.
+
+Pull the image:
+
+```bash
+docker pull ghcr.io/deven96/ahnlich-mcp:latest
+```
+
+### Claude Desktop
+
+Add the following to the Claude Desktop configuration:
+
+```json
+{
+  "mcpServers": {
+    "ahnlich": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--add-host",
+        "host.docker.internal:host-gateway",
+        "-e",
+        "AHNLICH_AI_HOST=host.docker.internal",
+        "-e",
+        "AHNLICH_AI_PORT=1370",
+        "ghcr.io/deven96/ahnlich-mcp:latest",
+        "--profile",
+        "ai"
+      ]
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving the configuration.
+
+### Codex
+
+```bash
+codex mcp add ahnlich -- docker run --rm -i \
+  --add-host host.docker.internal:host-gateway \
+  -e AHNLICH_AI_HOST=host.docker.internal \
+  -e AHNLICH_AI_PORT=1370 \
+  ghcr.io/deven96/ahnlich-mcp:latest \
+  --profile ai
+```
+
+## Install from source
+
+Use this method when developing or contributing to Ahnlich MCP.
+
+Clone the repository and install the locked dependencies:
+
+```bash
+git clone https://github.com/deven96/ahnlich.git
+cd ahnlich/mcp
+uv sync --locked --dev
+```
+
+Verify the setup:
+
+```bash
+uv run ahnlich-mcp doctor --profile ai
+```
+
+The stdio command for MCP clients is:
+
+```bash
+uv --directory /absolute/path/to/ahnlich/mcp run ahnlich-mcp --profile ai
+```
+
+For Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "ahnlich": {
+      "command": "uv",
       "args": [
         "--directory",
         "/absolute/path/to/ahnlich/mcp",
@@ -108,13 +181,13 @@ The server uses stdio transport and waits silently for MCP messages. If Ahnlich 
 }
 ```
 
-Find the absolute path to uv with:
+For Codex:
 
 ```bash
-which uv
+codex mcp add ahnlich -- \
+  uv --directory /absolute/path/to/ahnlich/mcp \
+  run ahnlich-mcp --profile ai
 ```
-
-Change the profile argument to `db` to use precomputed embeddings.
 
 ## Configuration
 
