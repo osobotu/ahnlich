@@ -2,25 +2,10 @@
 
 An MCP server that exposes [Ahnlich](https://ahnlich.dev/) vector storage and semantic search to MCP-compatible agents.
 
-## Architecture
+Ahnlich MCP supports two profiles:
 
-```mermaid
-flowchart LR
-    Agent["MCP-compatible agent"]
-    MCP["ahnlich-mcp"]
-
-    subgraph Ahnlich
-        AI["ahnlich-ai<br/>AI proxy :1370"]
-        DB["ahnlich-db<br/>Vector database :1369"]
-    end
-
-    Agent -->|"MCP over stdio"| MCP
-    MCP -->|"DB profile<br/>precomputed embeddings"| DB
-    MCP -->|"AI profile<br/>raw text"| AI
-    AI -->|"generated embeddings"| DB
-```
-
-The `db` profile connects directly to `ahnlich-db` and accepts user-provided embeddings. The `ai` profile sends raw text through `ahnlich-ai`, which generates embeddings and stores them in `ahnlich-db`.
+- `db` connects directly to Ahnlich DB and accepts precomputed embeddings.
+- `ai` sends raw text through Ahnlich AI, which generates embeddings and stores them in Ahnlich DB.
 
 ## Before you start
 
@@ -211,7 +196,7 @@ Supported AI models:
 - `bge-large-en-v1.5`
 - `jina-embeddings-v2-base-code`
 
-The selected model must also be enabled in `ahnlich-ai` through its `--supported-models` option. The bundled Compose configuration enables `all-minilm-l6-v2`.
+The selected model must also be enabled in `ahnlich-ai` through its `--supported-models` option. The bundled Compose configuration enables `all-minilm-l6-v2`. The bundled Compose configuration uses Ahnlich DB `0.3.2` and Ahnlich AI `0.4.1` by default. Override `AHNLICH_DB_VERSION` or `AHNLICH_AI_VERSION` only when testing another compatible release.
 
 Example:
 
