@@ -7,7 +7,7 @@ license = { text = "MIT" }
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "mcp>=1.27,<2",
-    "ahnlich-client-py>=0.4,<0.5",
+    "ahnlich-client-py==0.4.0",
     "betterproto>=2.0.0b7,<3",
 ]
 
@@ -21,6 +21,7 @@ dev = [
 ]
 
 agent-test = [
+    "gradio>=6.24,<7",
     "openai-agents",
 ]
 
